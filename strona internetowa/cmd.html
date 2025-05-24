@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Systemowa Konsola CMD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #000;
+      color: #0f0;
+      font-family: Consolas, monospace;
+      margin: 0;
+      padding: 1rem;
+    }
+    #terminal {
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+    #input {
+      background: none;
+      border: none;
+      color: #0f0;
+      font-family: inherit;
+      font-size: 1rem;
+      outline: none;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+<div id="terminal">Witamy w Symulatorze CMD Windows
+Wpisz !help, aby zobaczyć listę dostępnych komend
+</div>
+<input type="text" id="input" autofocus>
+
+<script>
+const terminal = document.getElementById('terminal');
+const input = document.getElementById('input');
+let beepAudio = null; // <- globalna zmienna
+
+const commands = {
+  '!help': 'Dostępne komendy:\n' +
+    '!help - lista komend\n' +
+    '!end - wróć na index.html\n' +
+    '!about - info o systemie\n' +
+    '!date - pokazuje aktualną datę\n' +
+    '!time - pokazuje aktualną godzinę\n' +
+    '!cls - czyści ekran\n' +
+    '!version - wersja systemu\n' +
+    '!color - zmienia kolor tekstu\n' +
+    '!reload - przeładowuje stronę\n' +
+    '!random - losuje liczbę\n' +
+    '!exit - zamyka symulator (przenosi do Google)\n' +
+    '!echo [tekst] - wypisuje tekst\n' +
+    '!url - pokazuje URL strony\n' +
+    '!system - info o przeglądarce\n' +
+    '!beep - dźwięk systemowy\n' +
+    '!stopbeep - koniec dźwięku systemowego\n' +
+    '!fullscreen - przełącza pełny ekran\n',
+
+  '!end': () => location.href = 'index.html',
+  '!about': 'System WebCMD v1.5.0 - Nebula Page',
+  '!date': new Date().toLocaleDateString(),
+  '!time': new Date().toLocaleTimeString(),
+  '!cls': () => terminal.textContent = 'Witamy w Symulatorze CMD Windows Wpisz !help, aby zobaczyć listę dostępnych komend', 
+  '!version': 'WebCMD Version 1.5.0 - Build 2025',
+  '!color': () => document.body.style.color = `#${Math.floor(Math.random()*16777215).toString(16)}`,
+  '!reload': () => location.reload(),
+  '!random': () => Math.floor(Math.random() * 100),
+  '!exit': () => location.href = 'https://google.com',
+  '!url': () => location.href,
+  '!fullscreen': () => document.documentElement.requestFullscreen(),
+  '!system': () => navigator.userAgent,
+  '!beep': () => {
+    if (!beepAudio) {
+      beepAudio = new Audio('/assets/haha.mp3');
+      beepAudio.loop = true;
+      beepAudio.play();
+    }
+  },
+  '!stopbeep': () => {
+    if (beepAudio) {
+      beepAudio.pause();
+      beepAudio.currentTime = 0;
+      beepAudio = null;
+    };
+  }}    
+
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const cmd = input.value.trim();
+    terminal.textContent += `\n> ${cmd}`;
+    input.value = '';
+
+    const [base, ...args] = cmd.split(' ');
+    const output = commands[base];
+
+    if (typeof output === 'function') {
+      const result = output(args.join(' '));
+      if (result !== undefined) terminal.textContent += `\n${result}`;
+    } else if (output !== undefined) {
+      terminal.textContent += `\n${output}`;
+    } else if (base === '!echo') {
+      terminal.textContent += '\n' + args.join(' ');
+    } else {
+      terminal.textContent += '\nNieznana komenda';
+    }
+
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+});
+</script>
+</body>
+</html>

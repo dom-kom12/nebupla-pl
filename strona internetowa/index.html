@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tryb Offline – Moja Strona</title>
+
+  <!-- Manifest -->
+  <link rel="manifest" href="scrypt/json/manifest.json" />
+  <meta name="theme-color" content="#121212" />
+
+  <!-- Ikony -->
+  <link rel="icon" type="image/png" href="/assets/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+  <link rel="shortcut icon" href="/assets/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="OfflineApp" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #fff;
+      margin: 0;
+      padding: 2rem;
+      text-align: center;
+    }
+    .status {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    #installBtn {
+      display: none;
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      background-color: #1e88e5;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #00e676;
+      text-align: center;
+      text-shadow: 0 0 8px #00e676aa;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+ <body>
+  <h1>Witaj Na Stronie Głównej</h1>
+  <div class="status" id="status"></div>
+  <button id="installBtn">📥 Zainstaluj aplikację</button>
+    <div>
+  <a href="opcje.html"><button class="status">Opcje</button></a>
+    </div>
+  <script>
+    // Rejestracja service workera
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/scrypt/js/sw.js')
+        .then(() => console.log('✅ Service Worker zarejestrowany!'))
+        .catch(err => console.error('❌ Błąd Service Workera:', err));
+    }
+
+    // Status online/offline
+    const status = document.getElementById('status');
+    function updateStatus(online) {
+      status.textContent = online ? '🟢 Jesteś online - posiadasz sieć' : '🔴 Brak połączenia z internetem - nie posiadasz sieci';
+    }
+
+    window.addEventListener('online', () => updateStatus(true));
+    window.addEventListener('offline', () => updateStatus(false));
+    updateStatus(navigator.onLine);
+
+    // Obsługa instalacji PWA
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('🛠️ beforeinstallprompt event!');
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'inline-block';
+    });
+
+    installBtn.addEventListener('click', () => {
+      installBtn.style.display = 'none';
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('✅ Aplikacja zainstalowana');
+          } else {
+            console.log('❌ Użytkownik anulował instalację');
+          }
+          deferredPrompt = null;
+        });
+      }
+    });
+  </script>
+</body>
+</html>

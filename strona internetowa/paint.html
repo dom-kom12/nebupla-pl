@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Paint - Prosty Rysownik</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #121212;
+      color: #eee;
+      text-align: center;
+    }
+    nav {
+      background: #222;
+      padding: 10px;
+    }
+    nav a {
+      color: #eee;
+      margin: 0 10px;
+      text-decoration: none;
+      font-size: 18px;
+      padding: 6px 12px;
+      border-radius: 5px;
+      background: #444;
+      transition: background 0.3s ease;
+    }
+    nav a:hover {
+      background: #666;
+    }
+    #paintCanvas {
+      border: 2px solid #666;
+      background: #fff;
+      cursor: crosshair;
+      display: block;
+      margin: 20px auto;
+      touch-action: none;
+    }
+    #paintControls {
+      margin-bottom: 20px;
+    }
+    #paintControls label {
+      margin: 0 10px;
+    }
+    #paintControls input[type=color],
+    #paintControls input[type=range] {
+      vertical-align: middle;
+    }
+    #paintControls button {
+      background: #444;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      margin: 0 5px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.3s ease;
+    }
+    #paintControls button:hover {
+      background: #666;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="paint.html">🎨 Paint</a>
+  <a href="short.html">🔗 Skracacz Linków</a>
+</nav>
+
+<h1>Prosty Paint - rysuj, gumkuj, zmieniaj kolor i rozmiar</h1>
+<canvas id="paintCanvas" width="1350" height="525" aria-label="Płótno do rysowania"></canvas>
+<div id="paintControls">
+  <label>Kolor: <input type="color" id="colorPicker" value="#000000" /></label>
+  <label>Rozmiar pędzla: <input type="range" id="brushSize" min="1" max="50" value="5" /></label>
+  <button id="brushBtn" aria-pressed="true">✏️ Pędzel</button>
+  <button id="eraserBtn" aria-pressed="false">🧽 Gumka</button>
+  <button id="clearBtn">🧹 Wyczyść</button>
+  <button id="saveBtn">💾 Zapisz jako obraz</button>
+</div>
+
+<script>
+  const canvas = document.getElementById('paintCanvas');
+  const ctx = canvas.getContext('2d');
+  let painting = false;
+  let erasing = false;
+  let brushColor = document.getElementById('colorPicker').value;
+  let brushSize = document.getElementById('brushSize').value;
+
+  function startPosition(e) {
+    painting = true;
+    draw(e);
+  }
+  function finishedPosition() {
+    painting = false;
+    ctx.beginPath();
+  }
+  function getPos(e) {
+    if(e.touches) {
+      return {
+        x: e.touches[0].clientX - canvas.getBoundingClientRect().left,
+        y: e.touches[0].clientY - canvas.getBoundingClientRect().top
+      };
+    }
+    return {
+      x: e.clientX - canvas.getBoundingClientRect().left,
+      y: e.clientY - canvas.getBoundingClientRect().top
+    };
+  }
+  function draw(e) {
+    if(!painting) return;
+    const pos = getPos(e);
+    if(erasing) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineWidth = brushSize;
+      ctx.lineCap = 'round';
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    } else {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = brushColor;
+      ctx.lineWidth = brushSize;
+      ctx.lineCap = 'round';
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  }
+
+  canvas.addEventListener('mousedown', startPosition);
+  canvas.addEventListener('mouseup', finishedPosition);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseout', finishedPosition);
+
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startPosition(e);
+  }, {passive:false});
+  canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    finishedPosition(e);
+  }, {passive:false});
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    draw(e);
+  }, {passive:false});
+
+  document.getElementById('colorPicker').addEventListener('change', e => {
+    brushColor = e.target.value;
+  });
+  document.getElementById('brushSize').addEventListener('input', e => {
+    brushSize = e.target.value;
+  });
+  document.getElementById('brushBtn').addEventListener('click', () => {
+    erasing = false;
+    document.getElementById('brushBtn').setAttribute('aria-pressed', 'true');
+    document.getElementById('eraserBtn').setAttribute('aria-pressed', 'false');
+  });
+  document.getElementById('eraserBtn').addEventListener('click', () => {
+    erasing = true;
+    document.getElementById('brushBtn').setAttribute('aria-pressed', 'false');
+    document.getElementById('eraserBtn').setAttribute('aria-pressed', 'true');
+  });
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = 'HDRysunek.WebP';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+</script>
+</body>
+</html>

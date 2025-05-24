@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<title>Skracacz Linków (lokalny)</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<nav>
+  <a href="paint.html">🎨 Paint</a>
+  <a href="short.html">🔗 Skracacz Linków</a>
+</nav>
+  <h1>Skracacz Linków (tylko lokalny)</h1>
+  <input id="longUrl" type="text" placeholder="Wklej długi link tutaj" style="width: 300px;" />
+  <button onclick="createShort()">Skróć link</button>
+
+  <div id="result" style="margin-top: 20px;"></div>
+
+<script>
+function createShort() {
+  const url = document.getElementById('longUrl').value.trim();
+  if (!url) return alert("Wpisz link!");
+
+  // Generuj 5-cyfrowy kod
+  const code = Math.floor(10000 + Math.random() * 90000).toString();
+
+  // Pobierz mapę z localStorage lub nową
+  let map = JSON.parse(localStorage.getItem('urlMap')) || {};
+
+  // Zapisz nowy kod i URL
+  map[code] = url;
+  localStorage.setItem('urlMap', JSON.stringify(map));
+
+  // Pokaż skrócony link (link lokalny)
+  const shortLink = `${window.location.origin}/redirect.html?code=${code}`;
+  document.getElementById('result').innerHTML = `
+    Skrócony link: <a href="${shortLink}">${shortLink}</a>
+    <br><small>Uwaga: działa tylko na tym samym komputerze i przeglądarce</small>
+  `;
+}
+</script>
+</body>
+</html>
+
+

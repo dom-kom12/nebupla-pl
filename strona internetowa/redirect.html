@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<title>Przekierowanie...</title>
+<script>
+window.onload = function() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  if (!code) {
+    document.body.innerHTML = "<p>Brak kodu do przekierowania.</p>";
+    return;
+  }
+
+  const map = JSON.parse(localStorage.getItem('urlMap')) || {};
+  const longUrl = map[code];
+
+  if (longUrl) {
+    // Przekieruj do oryginalnego URL
+    window.location.href = longUrl;
+  } else {
+    document.body.innerHTML = "<p>Nie znaleziono linku dla tego kodu.</p>";
+  }
+};
+</script>
+</head>
+<body>
+<p>Trwa przekierowywanie...</p>
+</body>
+</html>

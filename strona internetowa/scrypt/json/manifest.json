@@ -1,0 +1,21 @@
+{
+  "name": "Strona Głowna - Page",
+  "short_name": "Nebula - Page",
+  "start_url": "/README.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "description": "Nebula Page jest początkiem nowej przyszłości",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon2.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
